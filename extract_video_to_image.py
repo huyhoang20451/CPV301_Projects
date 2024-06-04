@@ -1,46 +1,51 @@
-import cv2
 import os
+import cv2
 
-# Hàm trích xuất khung hình từ video
-def extract_frames(video_path, output_folder):
-    # Tạo thư mục đầu ra nếu chưa tồn tại
-    os.makedirs(output_folder, exist_ok=True)
+# List of video names
+videos = ['Huy_Hoang', 'Quoc_Dat', 'Vu_Hai']
+
+# Loop through each video
+for video in videos:
+    # Create a directory for each video if it doesn't exist
+    output_dir = f'./images/{video}'
+    os.makedirs(output_dir, exist_ok=True)
     
-    # Mở tệp video
-    cap = cv2.VideoCapture(video_path)
-    
-    # Kiểm tra xem video có mở được không
+    # Open the video file
+    cap = cv2.VideoCapture(f'./Dataset_video/{video}.mp4')
     if not cap.isOpened():
-        print(f"Error: Could not open video {video_path}.")
-        return
-
-    # Khởi tạo bộ đếm khung hình
-    frame_number = 0
-
-    # Vòng lặp để đọc khung hình
-    while True:
+        print(f"Error: Could not open video {video}.mp4")
+        continue
+    
+    count = 0
+    while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
-
-        # Lưu khung hình thành tệp ảnh
-        frame_filename = os.path.join(output_folder, f'frame_{frame_number:04d}.png')
-        cv2.imwrite(frame_filename, frame)
-
-        # Tăng bộ đếm khung hình
-        frame_number += 1
-
-    # Giải phóng đối tượng capture
+        
+        # Convert frame to grayscale
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
+        # Load the face cascade
+        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+        if face_cascade.empty():
+            print("Error: Could not load face cascade.")
+            break
+        
+        # Detect faces
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        
+        # Loop through detected faces and draw rectangles
+        for (x, y, w, h) in faces:
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+            roi_gray = gray[y:y+h, x:x+w]
+            
+            # Save the detected face image
+            face_filename = f'{output_dir}/{video}_{count}.jpg'
+            cv2.imwrite(face_filename, roi_gray)
+            print(f"Saved face image {face_filename}")
+            count += 1
+    
+    # Release the video capture object
     cap.release()
 
-    print(f"Extracted {frame_number} frames from {video_path}.")
-
-# Đường dẫn tới các video
-videos = ['Dataset/Huy_Hoàng.mp4', 'Dataset/Quốc_Đạt.mp4', 'Dataset/Vũ_Hải.mp4']
-
-# Thư mục đầu ra cho từng video
-output_folders = ['Dataset_frame_extract/frames_video_HuyHoang', 'Dataset_frame_extract/frames_video_QuocDat', 'Dataset_frame_extract/frames_video_VuHai']
-
-# Trích xuất khung hình cho từng video
-for video, folder in zip(videos, output_folders):
-    extract_frames(video, folder)
+print("Processing complete.")
