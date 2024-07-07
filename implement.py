@@ -57,5 +57,6 @@ def video_face_tracking(video_source):
 # Example usage
 #Đây là video để test nhận diện khuôn mặt.
 if __name__ == '__main__':
-    video_source = 'Video_detect_test.mp4'  # Use 0 for webcam or 'path/to/video.mp4' for a video file
+    # video_source = 'Video_detect_test.mp4'  # Use 0 for webcam or 'path/to/video.mp4' for a video file
+    video_source = 0
     video_face_tracking(video_source)

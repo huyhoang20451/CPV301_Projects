@@ -12,6 +12,10 @@ if id == 1:
     face_id = input('\n nhap ID khuon mat :')
     face_name = input('\n nhap ten khuon mat :')
 
+    # Create a directory for the new face if it doesn't exist
+    output_dir = f'images/{face_name}'
+    os.makedirs(output_dir, exist_ok=True)
+
     print('\n Dang khoi tao Camera...')
 
     num_img = 0 
@@ -35,7 +39,7 @@ if id == 1:
             num_img += 1
             
             # Save the detected face image
-            file_name = f'dataset_image/{face_id}_{face_name}_{num_img}.jpg'
+            file_name = f'{output_dir}/{face_name}_{num_img}.jpg'
             cv2.imwrite(file_name, gray[y:y+h, x:x+w])
             
             cv2.imshow('Detecting', frame)
